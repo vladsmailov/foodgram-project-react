@@ -1,1 +1,1 @@
-# praktikum_new_diplom
+# Vladsmailov yandex-praktikum diplom project.
