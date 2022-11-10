@@ -6,16 +6,14 @@
 в собственные типы данных Python. А так же
 преобразовывать разобранные данные обратно в сложные типы.
 """
+import base64
+
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from recipes.models import (
-    Recipe, Tag, Ingredient, IngredientQuantity,
-    User, Favorite, Subscribe,
-    ShoppingCart,
-)
 
-import base64
+from recipes.models import (Favorite, Ingredient, IngredientQuantity, Recipe,
+                            ShoppingCart, Subscribe, Tag, User)
 
 
 class Base64ImageField(serializers.ImageField):

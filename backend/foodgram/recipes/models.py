@@ -1,6 +1,6 @@
 """Модели для приложения recipes."""
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.utils.html import format_html
 
 User = get_user_model()
