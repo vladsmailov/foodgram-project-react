@@ -13,17 +13,18 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 
 from recipes.models import (Favorite, Ingredient, IngredientQuantity, Recipe,
-                            ShoppingCart, Subscribe, Tag, User)
+                            ShoppingCart, Tag, User)
+from users.models import Subscribe
 
 from .permissions import AdminAuthorPermission, AdminOrReadOnlyPermission
 from .serializers import (CreateUpdateRecipeSerializer, FavoriteSerializer,
                           IngredientSerializer, ListRecipeSerializer,
                           ShoppingCartSerializer, SubscribeSerializer,
-                          TagSerializer, UserSerializer)
+                          TagSerializer, UserSerializer, SubscribeCreateSerializer)
 
 
-class CustomUserViewSet(UserViewSet):
-    """CustomUserViewSet for API."""
+class UserViewSet(UserViewSet):
+    """UserViewSet for API."""
 
     queryset = User.objects.all()
     pagination_class = PageNumberPagination
@@ -39,7 +40,7 @@ class CustomUserViewSet(UserViewSet):
         запрашивающего пользователя.
         """
         user = request.user
-        queryset = Subscribe.objects.filter(user=user)
+        queryset = user.subscriber.all()
         result = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(
             result, many=True, context={'request': request}
@@ -64,7 +65,7 @@ class CustomUserViewSet(UserViewSet):
                 'errors': 'Нельзя подписыаться на одного автора дважды.'
             }, status=status.HTTP_400_BAD_REQUEST)
         subscribe = Subscribe.objects.create(user=user, author=author)
-        serializer = SubscribeSerializer(
+        serializer = SubscribeCreateSerializer(
             subscribe, context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)

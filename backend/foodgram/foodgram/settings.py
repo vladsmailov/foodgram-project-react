@@ -87,7 +87,7 @@ DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
         # 'NAME': os.getenv('DB_NAME', default='postgres'),
-        'NAME': os.getenv('DB_NAME', default='foodgram_final'),
+        'NAME': os.getenv('DB_NAME', default='foodgramtest'),
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='Precious'),
         'HOST': os.getenv('DB_HOST', default='127.0.0.1'),
@@ -140,7 +140,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Переопределение стандартной модели пользователя
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.User'
 
 # Настройки DRF (JWT, IsAuthenticated)
 
@@ -174,3 +174,17 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+
+# Настройки djoser
+
+DJOSER = {
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
+    },
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+    },
+}
