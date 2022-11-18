@@ -1,8 +1,10 @@
 """Файл админки для приложения recipes."""
 
+from django.utils.html import format_html
+
 from django.contrib import admin
 from .models import (
-    MeasurementUnit, Ingredient, IngredientQuantity, Tag, 
+    Ingredient, IngredientQuantity, Tag, 
     Recipe, Favorite, ShoppingCart
 )
 
@@ -11,17 +13,6 @@ class BaseAdminSettings(admin.ModelAdmin):
 
     empty_value_display = '-пусто-'
     list_filter = ('author', 'name', 'tags')
-
-
-class MeasurementUnitAdmin(BaseAdminSettings):
-    """Настройка панели единиц измерения."""
-
-    list_display = (
-        'name',
-    )
-    list_display_links = ('name',)
-    search_fields = ('name',)
-    list_filter = ('name',)
 
 
 class IngredientAdmin(BaseAdminSettings):
@@ -42,7 +33,7 @@ class IngredientQuantityAdmin(admin.ModelAdmin):
     Настройка панели ингредиенты-рецепты-количество.
     """
     list_display = (
-        'recipe',
+        'current_recipe',
         'ingredient',
         'quantity',
     )
@@ -70,6 +61,13 @@ class TagAdmin(BaseAdminSettings):
     list_display_links = ('name',)
     search_fields = ('name',)
     list_filter = ('name',)
+
+    def colored_name(self):
+        """Метод для вывода цвета в формате #######."""
+        return format_html(
+            '<span style="color: #{};">{}</span>',
+            self.color,
+        )
 
 
 class RecipeAdmin(BaseAdminSettings):
@@ -106,7 +104,6 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_filter = ('recipe', 'user')
     search_fields = ('user',)
 
-admin.site.register(MeasurementUnit, MeasurementUnitAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientQuantity, IngredientQuantityAdmin)
 admin.site.register(Tag, TagAdmin)

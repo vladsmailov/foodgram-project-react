@@ -2,29 +2,10 @@
 from tabnanny import verbose
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils.html import format_html
 
-from api.validators import ingredients_validator
 
 User = get_user_model()
 
-class MeasurementUnit(models.Model):
-    """Модель единиц измерения ингредиентов."""
-
-    name = models.CharField(
-        max_length=20,
-        verbose_name='Название единицы измерения',
-        help_text='г, кг, л, мл...'
-    )
-
-    class Meta:
-        """Мета для единицы измерения"""
-
-        ordering = ('name', )
-    
-    def __str__(self):
-        """Метод строкового отображения объекта ед.изм."""
-        return self.name
 
 class Ingredient(models.Model):
     """Модель ингредиента."""
@@ -36,9 +17,12 @@ class Ingredient(models.Model):
             f'{"Напишите понятное название ингредиента."}'
         )
     )
-    measurement_unit = models.ForeignKey(
-        MeasurementUnit,
-        on_delete = models.PROTECT,
+    measurement_unit = models.CharField(
+        max_length=1000,
+        verbose_name='Единицы измерения ингредиента',
+        help_text=(
+            f'{"Напишите что понравится, от чайной ложки до ковша экскаватора."}'
+        )
     )
 
     class Meta:
@@ -57,10 +41,12 @@ class IngredientQuantity(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        related_name='+'
     )
-    recipe = models.ForeignKey(
+    current_recipe = models.ForeignKey(
        'Recipe',
         on_delete=models.CASCADE,
+        related_name='+'
     )
     quantity = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента',
@@ -68,6 +54,14 @@ class IngredientQuantity(models.Model):
     )
     class Meta:
         default_related_name = 'ingridientsquantity'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('current_recipe', 'ingredient',),
+                name='recipe_ingredient_exists'),
+            models.CheckConstraint(
+                check=models.Q(quantity__gte=1),
+                name='quantity_gte_1'),
+        )
     
     def __str__(self):
         """
@@ -96,12 +90,6 @@ class Tag(models.Model):
     )
     color = models.CharField(max_length=7, default="#ffffff")
 
-    def colored_name(self):
-        """Метод для вывода цвета в формате #######."""
-        return format_html(
-            '<span style="color: #{};">{}</span>',
-            self.color,
-        )
 
     class Meta:
         """Мета для объектов Тег."""
@@ -151,9 +139,10 @@ class Recipe(models.Model):
         )
     )
     ingredients = models.ManyToManyField(
-        Ingredient,
-        through=IngredientQuantity,
-        related_name='recipes',
+        # Ingredient,
+        IngredientQuantity,
+        # related_name='recipes',
+        symmetrical=False,
         verbose_name='Ингредиенты',
         help_text='Выберите ингредиенты для рецепта'
         )
