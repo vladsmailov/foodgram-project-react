@@ -118,6 +118,7 @@ class IngredientQuantityShowSerializer(serializers.ModelSerializer):
             'quantity',
         )
 
+
 class ListRecipeSerializer(serializers.ModelSerializer):
     """
     Сериализатор для вывода данных при запросе к эндпоинту recipes.
@@ -127,10 +128,7 @@ class ListRecipeSerializer(serializers.ModelSerializer):
 
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
-    ingredients = IngredientQuantityShowSerializer(
-        many=True,
-        read_only=True,
-        )
+    ingredients = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
     is_favorite = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -143,6 +141,10 @@ class ListRecipeSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time', 'is_favorite',
             'is_in_shopping_cart',
             )
+    
+    def get_ingredients(self, obj):
+        ingredients = IngredientQuantity.objects.filter(current_recipe=obj)
+        return IngredientQuantityShowSerializer(ingredients, many=True).data
 
     def get_is_favorite(self, obj):
         """Метод для отображения наличия рецепта в "избранном"."""
@@ -198,12 +200,10 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                 **tag)
             tags_list.append(current_tag)
         recipe.tags.set(tags_list)
-        # import pdb; pdb.set_trace()
         return recipe
 
     def create_ingredients(self, recipe, ingredients):
         """Метод для создания списка ингредиентов."""
-        # import pdb; pdb.set_trace()
         IngredientQuantity.objects.bulk_create([
             IngredientQuantity(
                 current_recipe=recipe,
@@ -254,14 +254,8 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        """Метод вывода данныех созданного объекта."""
-
-        return ListRecipeSerializer(
-            instance,
-            context={
-                'request': self.context.get('request'),
-            }
-        ).data
+        """Метод вывода данных созданного объекта."""
+        return ListRecipeSerializer(instance, context=self.context).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
