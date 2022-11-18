@@ -7,7 +7,7 @@
 преобразовывать разобранные данные обратно в сложные типы.
 """
 
-from django.shortcuts import get_object_or_404 
+from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
@@ -21,6 +21,7 @@ from users.models import Subscribe
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователя."""
 
+    is_subscribed = serializers.SerializerMethodField()
     class Meta:
         """Мета для сериализатора пользователя."""
 
@@ -31,7 +32,15 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'username',
+            'is_subscribed'
         )
+
+    def get_is_subscribed(self, obj: User):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return Subscribe.objects.filter(
+            user=request.user, author=obj).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -83,14 +92,15 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
             ingredient=validated_data.get('id'),
             quantity=validated_data.get('quantity')
         )
- 
+
 class IngredientQuantityShowSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient',
         read_only=True
     )
-    measurement_unit = serializers.StringRelatedField(
-        source='ingredient.measurement_unit',
+    measurement_unit = serializers.SlugRelatedField(
+        source='ingredient',
+        slug_field='measurement_unit',
         read_only=True,
     )
     name = serializers.SlugRelatedField(
@@ -120,12 +130,10 @@ class ListRecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientQuantityShowSerializer(
         many=True,
         read_only=True,
-        source='ingridientsquantity'
         )
     tags = TagSerializer(many=True)
     is_favorite = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-
     class Meta:
         """Мета для сериализатора рецептов."""
 
@@ -163,7 +171,6 @@ class ListRecipeSerializer(serializers.ModelSerializer):
 class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     """Десериализатор для создания новых рецептов и обновления старых."""
 
-
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientQuantitySerializer(many=True)
@@ -191,17 +198,19 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                 **tag)
             tags_list.append(current_tag)
         recipe.tags.set(tags_list)
+        # import pdb; pdb.set_trace()
         return recipe
 
     def create_ingredients(self, recipe, ingredients):
         """Метод для создания списка ингредиентов."""
+        # import pdb; pdb.set_trace()
         IngredientQuantity.objects.bulk_create([
             IngredientQuantity(
-                recipe=recipe,
+                current_recipe=recipe,
                 quantity=ingredient['quantity'],
                 ingredient=ingredient['ingredient'],
             ) for ingredient in ingredients
-        ]) 
+        ])
 
     def validate(self, data):
         """Валидация полей рецепта перед созданием экзмепляра."""
@@ -214,7 +223,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     'Нельзя добавлять один и тот же ингредиент дважды.'
                 )
-            ingredients_list.append(ingredient['id'])  
+            ingredients_list.append(ingredient['id'])
         for tag in tags:
             if tag['id'] in tags_list:
                 raise ValidationError(
@@ -225,7 +234,6 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 'Увы, но мгновенное приготовление блюда невозможно.'
             )
-        
         return data
 
 
@@ -240,13 +248,14 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         if 'ingredients' in validated_data:
             recipe = instance
             ingredients = validated_data.pop('ingredients')
-            IngredientQuantity.objects.filter(recipe=recipe).delete()
+            IngredientQuantity.objects.filter(current_recipe=recipe).delete()
             self.create_ingredients(recipe, ingredients)
         instance.save()
         return instance
 
     def to_representation(self, instance):
         """Метод вывода данныех созданного объекта."""
+
         return ListRecipeSerializer(
             instance,
             context={

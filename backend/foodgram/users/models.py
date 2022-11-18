@@ -42,12 +42,7 @@ class User(AbstractUser):
         verbose_name='password',
         max_length=150
     )
-    is_subscribed = models.ManyToManyField(
-        'Subscribe',
-        verbose_name='Подписка',
-        related_name='subscribers',
-    )
-
+    
 
     class Meta:
         """Мета для модели пользователя."""

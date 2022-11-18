@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
 
 # Application definition
 
@@ -43,7 +45,6 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'api',
     'users',
-    # 'users.apps.UsersConfig',
     'recipes',
     'rest_framework.authtoken',
     'djoser',
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -87,7 +89,7 @@ DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
         # 'NAME': os.getenv('DB_NAME', default='postgres'),
-        'NAME': os.getenv('DB_NAME', default='foodgramtest'),
+        'NAME': os.getenv('DB_NAME', default='foodgram2'),
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='Precious'),
         'HOST': os.getenv('DB_HOST', default='127.0.0.1'),
@@ -145,14 +147,11 @@ AUTH_USER_MODEL = 'users.User'
 # Настройки DRF (JWT, IsAuthenticated)
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': (
-        ('rest_framework.permissions.IsAuthenticated', )
+        ('rest_framework.permissions.AllowAny', )
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -163,13 +162,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-# Настройки токена
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
-
 # Настройки электронной почты
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
@@ -178,6 +170,7 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 # Настройки djoser
 
 DJOSER = {
+    'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',
@@ -188,3 +181,6 @@ DJOSER = {
         'user': ['rest_framework.permissions.IsAuthenticated'],
     },
 }
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_URLS_REGEX = r'^/api/v1/.*$'
