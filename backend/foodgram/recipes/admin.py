@@ -1,12 +1,11 @@
 """Файл админки для приложения recipes."""
 
+from django.contrib import admin
 from django.utils.html import format_html
 
-from django.contrib import admin
-from .models import (
-    Ingredient, IngredientQuantity, Tag, 
-    Recipe, Favorite, ShoppingCart
-)
+from .models import (Favorite, Ingredient, IngredientQuantity, Recipe,
+                     ShoppingCart, Tag)
+
 
 class BaseAdminSettings(admin.ModelAdmin):
     """Настройки панели администартора."""
@@ -25,7 +24,6 @@ class IngredientAdmin(BaseAdminSettings):
     list_display_links = ('name',)
     search_fields = ('name',)
     list_filter = ('name',)
-
 
 
 class IngredientQuantityAdmin(admin.ModelAdmin):
@@ -103,6 +101,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'user')
     list_filter = ('recipe', 'user')
     search_fields = ('user',)
+
 
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientQuantity, IngredientQuantityAdmin)

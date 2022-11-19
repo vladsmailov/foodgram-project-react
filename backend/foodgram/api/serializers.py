@@ -7,11 +7,11 @@
 преобразовывать разобранные данные обратно в сложные типы.
 """
 
-from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
-from drf_base64.fields import Base64ImageField
 
 from recipes.models import (Favorite, Ingredient, IngredientQuantity, Recipe,
                             ShoppingCart, Tag, User)
@@ -22,6 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователя."""
 
     is_subscribed = serializers.SerializerMethodField()
+
     class Meta:
         """Мета для сериализатора пользователя."""
 
@@ -36,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj: User):
+        """Метод вывода данных о подписке."""
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
@@ -68,7 +70,7 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
 
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient',
-        queryset = Ingredient.objects.all(),
+        queryset=Ingredient.objects.all(),
     )
 
     class Meta:
@@ -77,7 +79,9 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
             'id',
             'quantity',
         )
+
     def validate_quantity(self, data):
+        """Метод валидации данных."""
         if int(data) < 1:
             raise ValidationError({
                 'ingredients': (
@@ -93,7 +97,10 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
             quantity=validated_data.get('quantity')
         )
 
+
 class IngredientQuantityShowSerializer(serializers.ModelSerializer):
+    """Сериализатор для вывода данных об снгредиентах в рецептах."""
+
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient',
         read_only=True
@@ -110,6 +117,7 @@ class IngredientQuantityShowSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Мета для сериализатора Ингредиенты-количество-Рецепты."""
         model = IngredientQuantity
         fields = (
             'id',
@@ -132,6 +140,7 @@ class ListRecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     is_favorite = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+
     class Meta:
         """Мета для сериализатора рецептов."""
 
@@ -140,9 +149,10 @@ class ListRecipeSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'image',
             'name', 'text', 'cooking_time', 'is_favorite',
             'is_in_shopping_cart',
-            )
-    
+        )
+
     def get_ingredients(self, obj):
+        """Метод получения ингредиента для вывода данных."""
         ingredients = IngredientQuantity.objects.filter(current_recipe=obj)
         return IngredientQuantityShowSerializer(ingredients, many=True).data
 
@@ -185,7 +195,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'tags', 'author', 'ingredients', 'image',
             'name', 'text', 'cooking_time',
-            )
+        )
 
     def create(self, validated_data):
         """Метод для создания новых записей рецептов в БД."""
@@ -236,7 +246,6 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
         return data
 
-
     def update(self, instance, validated_data):
         """Метод для обновления уже существующих рецептов в БД."""
         instance.name = validated_data.get('name', instance.name)
@@ -244,7 +253,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time
-            )
+        )
         if 'ingredients' in validated_data:
             recipe = instance
             ingredients = validated_data.pop('ingredients')
@@ -315,8 +324,11 @@ class SubscribeSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, object):
         """Поле-индикатор наличия подписки на автора."""
         return Subscribe.objects.prefetch_related(
-            Prefetch('subscribers', queryset=Subscribe.objects.filter(user=object.user,
-            author=object.id))
+            Prefetch('subscribers', queryset=Subscribe.objects.filter(
+                user=object.user,
+                author=object.id
+            )
+            )
         ).exists()
 
     def get_recipes(self, object):
@@ -337,10 +349,12 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления объекта подписки."""
 
     class Meta:
+        """Мета для сериализатора создания подписки."""
         model = Subscribe
         fields = ('user', 'author')
 
     def validate(self, data):
+        """Метод валидации данных."""
         get_object_or_404(User, username=data['author'])
         if self.context['request'].user == data['author']:
             raise ValidationError({
@@ -356,6 +370,7 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
+        """Метод вывода данных."""
         return SubscribeSerializer(
             instance.author,
             context={'request': self.context.get('request')}
@@ -388,7 +403,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         ).exists():
             raise serializers.ValidationError(
                 'Рецепт уже в списке покупок.'
-                )
+            )
         return data
 
     def to_representation(self, instance):

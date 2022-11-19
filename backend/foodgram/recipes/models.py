@@ -1,8 +1,6 @@
 """Модели для приложения recipes."""
-from tabnanny import verbose
 from django.contrib.auth import get_user_model
 from django.db import models
-
 
 User = get_user_model()
 
@@ -21,7 +19,7 @@ class Ingredient(models.Model):
         max_length=1000,
         verbose_name='Единицы измерения ингредиента',
         help_text=(
-            f'{"Напишите что понравится, от чайной ложки до ковша экскаватора."}'
+            f'{"От чайной ложки до ковша экскаватора."}'
         )
     )
 
@@ -44,7 +42,7 @@ class IngredientQuantity(models.Model):
         related_name='+'
     )
     current_recipe = models.ForeignKey(
-       'Recipe',
+        'Recipe',
         on_delete=models.CASCADE,
         related_name='+'
     )
@@ -52,7 +50,9 @@ class IngredientQuantity(models.Model):
         verbose_name='Количество ингредиента',
         default=0
     )
+
     class Meta:
+        """Мета для ингредиентов-количества-рецептов."""
         default_related_name = 'ingridientsquantity'
         constraints = (
             models.UniqueConstraint(
@@ -62,7 +62,7 @@ class IngredientQuantity(models.Model):
                 check=models.Q(quantity__gte=1),
                 name='quantity_gte_1'),
         )
-    
+
     def __str__(self):
         """
         Метод вывода в строковый формат.
@@ -89,7 +89,6 @@ class Tag(models.Model):
         unique=True
     )
     color = models.CharField(max_length=7, default="#ffffff")
-
 
     class Meta:
         """Мета для объектов Тег."""
@@ -139,18 +138,16 @@ class Recipe(models.Model):
         )
     )
     ingredients = models.ManyToManyField(
-        # Ingredient,
         IngredientQuantity,
-        # related_name='recipes',
         symmetrical=False,
         verbose_name='Ингредиенты',
         help_text='Выберите ингредиенты для рецепта'
-        )
+    )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги',
         help_text='Выберите теги для рецепта'
-        )
+    )
 
     class Meta:
         """Мета для рецепта."""
@@ -160,7 +157,6 @@ class Recipe(models.Model):
             models.UniqueConstraint(
                 fields=('name',),
                 name='recipe_name_exists'),
-            
         )
 
     def __str__(self):
