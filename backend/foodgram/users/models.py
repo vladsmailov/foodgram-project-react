@@ -6,7 +6,7 @@ from django.db import models
 
 class User(AbstractUser):
     """Модель пользователя."""
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
@@ -42,7 +42,6 @@ class User(AbstractUser):
         verbose_name='password',
         max_length=150
     )
-    
 
     class Meta:
         """Мета для модели пользователя."""
@@ -74,4 +73,3 @@ class Subscribe(models.Model):
     def __str__(self):
         """Метод вывода в строковый формат объектов подписки."""
         return f'{self.user} подписан на {self.author}'
-
