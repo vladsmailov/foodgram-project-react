@@ -11,7 +11,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
-from drf_base64.fields import Base64ImageField
+from drf_extra_fields.fields import Base64ImageField
+# from drf_base64.fields import Base64ImageField
 
 from recipes.models import (Favorite, Ingredient, IngredientQuantity, Recipe,
                             ShoppingCart, Tag, User)

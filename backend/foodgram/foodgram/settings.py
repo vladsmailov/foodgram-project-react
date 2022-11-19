@@ -25,7 +25,7 @@ SECRET_KEY = 'aa&!7cbh60srjaz(mp12(yp3v@^nquz*mbw(%07&k7o^3n=b2k'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
@@ -87,13 +87,12 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-        # 'NAME': os.getenv('DB_NAME', default='postgres'),
-        'NAME': os.getenv('DB_NAME', default='foodgram2'),
-        'USER': os.getenv('POSTGRES_USER', default='postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='Precious'),
-        'HOST': os.getenv('DB_HOST', default='127.0.0.1'),
-        'PORT': os.getenv('DB_PORT', default='5432'),
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
