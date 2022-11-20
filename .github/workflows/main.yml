@@ -65,6 +65,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            cd foodgram/infra
             sudo docker-compose down
             sudo docker pull strayd0g/backend:latest
             touch .env
