@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'recipes',
     'rest_framework.authtoken',
     'djoser',
+    'corsheaders',
+
 ]
 
 MIDDLEWARE = [
