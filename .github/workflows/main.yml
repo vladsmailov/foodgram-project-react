@@ -1,5 +1,5 @@
 # .github/workflows/**main.yml**
-name: Django-app workflow
+name: foodgram-app workflow
 
 on: [push]
 
@@ -66,8 +66,10 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd foodgram/infra
-            sudo docker-compose down
+            sudo docker-compose stop
+            sudo docker-compose rm backend
             sudo docker pull strayd0g/backend:latest
+            sudo docker pull strayd0g/frontend:latest
             touch .env
             echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env 
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -76,7 +78,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker-compose up -d
+            sudo docker-compose up -d --build
   send_message:
     runs-on: ubuntu-latest
     needs: deploy
