@@ -9,7 +9,7 @@ services:
       - ../backend/.env
 
   backend:
-    image: strayd0g/foodgram-backend:latest
+    image: strayd0g/backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
@@ -20,7 +20,7 @@ services:
       - ../backend/.env
 
   frontend:
-    image: strayd0g/foodgram-frontend:latest
+    image: strayd0g/frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
