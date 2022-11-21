@@ -85,7 +85,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели ингредиентов API."""
 
     queryset = Ingredient.objects.all()
-    pagination_class = PageNumberPagination
+    pagination_class = None
     serializer_class = IngredientSerializer
     permission_classes = (AdminOrReadOnlyPermission, )
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
@@ -98,7 +98,7 @@ class TagViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Тегов API."""
 
     queryset = Tag.objects.all()
-    pagination_class = PageNumberPagination
+    pagination_class = None
     serializer_class = TagSerializer
     permission_classes = (AdminOrReadOnlyPermission, )
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
