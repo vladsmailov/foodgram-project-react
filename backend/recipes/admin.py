@@ -31,11 +31,10 @@ class IngredientQuantityAdmin(admin.ModelAdmin):
     Настройка панели ингредиенты-рецепты-количество.
     """
     list_display = (
-        'current_recipe',
         'ingredient',
         'quantity',
     )
-    list_filter = ('recipe', 'ingredient')
+    list_filter = ('quantity', 'ingredient')
 
 
 class IngredientQuantityInLine(admin.TabularInline):
