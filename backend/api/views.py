@@ -11,7 +11,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .permissions import AdminAuthorPermission, AdminOrReadOnlyPermission
+from .permissions import AdminAuthorPermission
 from .serializers import (CreateUpdateRecipeSerializer, FavoriteSerializer,
                           IngredientSerializer, ListRecipeSerializer,
                           ShoppingCartSerializer, SubscribeCreateSerializer,
