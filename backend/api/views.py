@@ -11,6 +11,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from .filters import IngredientSearchFilter, RecipeFilter
 from .permissions import AdminAuthorPermission
 from .serializers import (CreateUpdateRecipeSerializer, FavoriteSerializer,
                           IngredientSerializer, ListRecipeSerializer,
@@ -87,10 +88,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     pagination_class = None
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
-    filterset_fields = ('name', )
-    search_fields = ('=name',)
-    lookup_field = 'pk'
+    filterset_class = IngredientSearchFilter
+    search_fields = ('^name',)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -99,8 +98,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     pagination_class = None
     serializer_class = TagSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter, )
-    filterset_fields = ('name', )
+    filterset_class = RecipeFilter
     search_fields = ('=name',)
     lookup_field = 'name'
 
