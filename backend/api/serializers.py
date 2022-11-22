@@ -77,6 +77,7 @@ class TagListSerializer(serializers.RelatedField):
                 'Недопустимый первичный ключ "404" - объект не существует.'
             ) from e
 
+
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор ингердиентов для приложения API."""
 
