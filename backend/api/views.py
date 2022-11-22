@@ -97,8 +97,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     pagination_class = None
     serializer_class = TagSerializer
-    search_fields = ('=name',)
-    lookup_field = 'name'
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

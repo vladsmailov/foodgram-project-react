@@ -30,8 +30,10 @@ SECRET_KEY = 'aa&!7cbh60srjaz(mp12(yp3v@^nquz*mbw(%07&k7o^3n=b2k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+# Для прода
 ALLOWED_HOSTS = ['*']
+# Для локальных тестов
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost:3000']
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
@@ -93,7 +95,7 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
+# Для прода
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE'),
@@ -104,7 +106,15 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT'),
     }
 }
-
+# Для локальных тестов
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+#         'NAME': os.getenv('DB_NAME', default='foodgram2'),
+#         'USER': os.getenv('POSTGRES_USER', default='postgres'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='Precious'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -189,6 +199,8 @@ DJOSER = {
         'user': ['rest_framework.permissions.IsAuthenticated'],
     },
 }
-
+#Для прода
 CORS_ORIGIN_ALLOW_ALL = False
+#CORS_ORIGIN_ALLOW_ALL для локального теста
+# CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/v1/.*$'

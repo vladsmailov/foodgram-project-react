@@ -65,7 +65,7 @@ class RecipeAdmin(BaseAdminSettings):
         'cooking_time', 'id', 'image',
     )
     list_display_links = ('name',)
-    search_fields = ('name',)
+    search_fields = ('name', 'author', 'tags')
     list_filter = ('author', 'name', 'tags')
     filter_horizontal = ('tags',)
     inlines = (IngredientQuantityInLine,)

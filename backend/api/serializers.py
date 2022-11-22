@@ -53,7 +53,7 @@ class TagSerializer(serializers.ModelSerializer):
         """Мета для сериализатора тегов."""
 
         model = Tag
-        fields = ('name',)
+        fields = '__all__'
 
 
 class TagListSerializer(serializers.RelatedField):
