@@ -11,6 +11,7 @@ cryptography==38.0.3
 defusedxml==0.7.1
 drf-yasg==1.21.4
 Django==3.2.16
+django-colorfield
 django-environ==0.8.1
 django-filter==2.4.0
 django-templated-mail==1.1.1
