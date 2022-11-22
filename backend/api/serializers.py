@@ -186,7 +186,9 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientQuantitySerializer(many=True)
-    tags = TagSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
 
     class Meta:
         """Мета для десериализатора рецептов."""
@@ -204,12 +206,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, **validated_data)
         self.create_ingredients(recipe, ingredients)
-        tags_list = []
-        for tag in tags:
-            current_tag, _ = Tag.objects.get_or_create(
-                **tag)
-            tags_list.append(current_tag)
-        recipe.tags.set(tags_list)
+        # tags_list = []
+        # for tag in tags:
+        #     current_tag, _ = Tag.objects.get_or_create(
+        #         **tag)
+        #     tags_list.append(current_tag)
+        recipe.tags.set(tags)
         return recipe
 
     def create_ingredients(self, recipe, ingredients):
