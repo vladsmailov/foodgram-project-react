@@ -186,9 +186,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientQuantitySerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True
-    )
+    tags = TagSerializer(many=True)
 
     class Meta:
         """Мета для десериализатора рецептов."""
@@ -206,7 +204,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, **validated_data)
         self.create_ingredients(recipe, ingredients)
-        recipe.tags.set(tags)
+        tags_list = []
+        for tag in tags:
+            current_tag, _ = Tag.objects.get_or_create(
+                **tag)
+            tags_list.append(current_tag)
+        recipe.tags.set(tags_list)
         return recipe
 
     def create_ingredients(self, recipe, ingredients):
@@ -222,6 +225,8 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Валидация полей рецепта перед созданием экзмепляра."""
         ingredients = self.initial_data.get('ingredients')
+        tags = self.initial_data.get('tags')
+        tags_list = []
         ingredients_list = []
         for ingredient in ingredients:
             if ingredient['id'] in ingredients_list:
@@ -229,6 +234,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                     'Нельзя добавлять один и тот же ингредиент дважды.'
                 )
             ingredients_list.append(ingredient['id'])
+        for tag in tags:
+            if tag['id'] in tags_list:
+                raise ValidationError(
+                    'Нельзя добавлять один и тот же тег дважды.'
+                )
+            tags_list.append(tag['id'])
         if data['cooking_time'] <= 0:
             raise ValidationError(
                 'Увы, но мгновенное приготовление блюда невозможно.'
