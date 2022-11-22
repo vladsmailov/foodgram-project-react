@@ -26,15 +26,15 @@ class IngredientAdmin(BaseAdminSettings):
     list_filter = ('name',)
 
 
-class IngredientQuantityAdmin(admin.ModelAdmin):
-    """
-    Настройка панели ингредиенты-рецепты-количество.
-    """
-    list_display = (
-        'ingredient',
-        'quantity',
-    )
-    list_filter = ('quantity', 'ingredient')
+# class IngredientQuantityAdmin(admin.ModelAdmin):
+#     """
+#     Настройка панели ингредиенты-рецепты-количество.
+#     """
+#     list_display = (
+#         'ingredient',
+#         'quantity',
+#     )
+#     list_filter = ('quantity', 'ingredient')
 
 
 class IngredientQuantityInLine(admin.TabularInline):
@@ -81,6 +81,7 @@ class RecipeAdmin(BaseAdminSettings):
     readonly_fields = ('is_favorite',)
     filter_horizontal = ('tags',)
     inlines = (IngredientQuantityInLine,)
+    exclude = ('ingredients', )
 
     def is_favorite(self, obj):
         return obj.is_favorite.all().count()
@@ -103,7 +104,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(IngredientQuantity, IngredientQuantityAdmin)
+# admin.site.register(IngredientQuantity, IngredientQuantityAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Favorite, FavoriteAdmin)
