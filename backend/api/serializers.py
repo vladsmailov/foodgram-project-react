@@ -7,6 +7,7 @@
 преобразовывать разобранные данные обратно в сложные типы.
 """
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
@@ -54,6 +55,27 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ('name',)
 
+
+class TagListSerializer(serializers.RelatedField):
+    """ Сериализатор для получения списка тегов"""
+
+    def to_representation(self, obj):
+        """Метод вывода результатов."""
+        return {
+            'id': obj.id,
+            'name': obj.name,
+            'color': obj.color,
+            'slug': obj.slug
+        }
+
+    def to_internal_value(self, data):
+        """Метод валдиации и обновления данных запроса."""
+        try:
+            return Tag.objects.get(id=data)
+        except ObjectDoesNotExist as e:
+            raise serializers.ValidationError(
+                'Недопустимый первичный ключ "404" - объект не существует.'
+            ) from e
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор ингердиентов для приложения API."""
@@ -186,7 +208,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientQuantitySerializer(many=True)
-    tags = TagSerializer(many=True)
+    tags = TagListSerializer(queryset=Tag.objects.all(), many=True)
 
     class Meta:
         """Мета для десериализатора рецептов."""
@@ -204,12 +226,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, **validated_data)
         self.create_ingredients(recipe, ingredients)
-        tags_list = []
-        for tag in tags:
-            current_tag, _ = Tag.objects.get_or_create(
-                **tag)
-            tags_list.append(current_tag)
-        recipe.tags.set(tags_list)
+        recipe.tags.set(tags)
         return recipe
 
     def create_ingredients(self, recipe, ingredients):
