@@ -205,7 +205,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         fields = [f'{ingredient.name}, {ingredient.total}'
                   f' {ingredient.measurement_unit}'
                   for ingredient in ingredients_list]
-        filename = 'ingredients.txt'
+        filename = 'shopping-cart.pdf'
         response_content = '\n'.join(fields)
         response = HttpResponse(response_content, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'
