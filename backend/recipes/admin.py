@@ -41,19 +41,20 @@ class TagAdmin(BaseAdminSettings):
 
     list_display = (
         'name',
-        'color',
+        'colored',
         'slug'
     )
-    list_display_links = ('name',)
-    search_fields = ('name',)
+    list_display_links = ('name', 'colored', 'slug',)
+    search_fields = ('name', 'slug')
     list_filter = ('name',)
 
-    def colored_name(self):
-        """Метод для вывода цвета в формате #######."""
+    @admin.display
+    def colored(self, obj):
         return format_html(
-            '<span style="color: #{};">{}</span>',
-            self.color,
+            f'<span style="background: {obj.color};'
+            f'color: {obj.color}";>___________</span>'
         )
+    colored.short_description = 'цвет'
 
 
 class RecipeAdmin(BaseAdminSettings):

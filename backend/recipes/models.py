@@ -1,4 +1,5 @@
 """Модели для приложения recipes."""
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -88,7 +89,13 @@ class Tag(models.Model):
         help_text='Добавьте уникальный ID для тега',
         unique=True
     )
-    color = models.CharField(max_length=7, default="#ffffff")
+    color = ColorField(
+        unique=True,
+        max_length=7,
+        default='#FF0000',
+        format='hex',
+        verbose_name='HEX-код цвета',
+    )
 
     class Meta:
         """Мета для объектов Тег."""
