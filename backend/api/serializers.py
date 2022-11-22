@@ -206,11 +206,6 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, **validated_data)
         self.create_ingredients(recipe, ingredients)
-        # tags_list = []
-        # for tag in tags:
-        #     current_tag, _ = Tag.objects.get_or_create(
-        #         **tag)
-        #     tags_list.append(current_tag)
         recipe.tags.set(tags)
         return recipe
 
@@ -227,21 +222,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Валидация полей рецепта перед созданием экзмепляра."""
         ingredients = self.initial_data.get('ingredients')
-        tags = self.initial_data.get('tags')
-        tags_list = []
         ingredients_list = []
         for ingredient in ingredients:
             if ingredient['id'] in ingredients_list:
                 raise ValidationError(
                     'Нельзя добавлять один и тот же ингредиент дважды.'
                 )
-            ingredients_list.append(ingredient['id'])
-        for tag in tags:
-            if tag['id'] in tags_list:
-                raise ValidationError(
-                    'Нельзя добавлять один и тот же тег дважды.'
-                )
-            tags_list.append(tag['id'])
         if data['cooking_time'] <= 0:
             raise ValidationError(
                 'Увы, но мгновенное приготовление блюда невозможно.'
