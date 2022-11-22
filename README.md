@@ -1,6 +1,12 @@
+Данные для тестирования ревьюером:
+email == vladsmailov@gmail.com
+password == 355-ad5-Uem-Eje
+
+
 # Vladsmailov yandex-praktikum diplom project.
 ## Проект foodgram (продуктовый ассистент).
-**Создан с применением стека технологий:**
+# Создан с применением стека технологий:
+
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
 ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)
@@ -15,27 +21,32 @@
 
 # Описание проекта
 
+>Ссылка на сайт [foodgram](http://51.250.98.163/)
+
 > Продуктовый ассистент - это помощник для приготоления блюд, здесь вы можете размещать свои рецепты, а так же делиться своими собственными, подписываться на авторов и добавлять рецепты в избранное и продуктовую корзину, которую потом можно будет распечатать и взять с собой в магазин!
 ## Как запустить проект:
 **Клонировать репозиторий и перейти в него в командной строке:**
 
 > git@github.com:vladsmailov/foodgram-project-react.git
 
-> cd foodgram-project-react
+```
+cd foodgram-project-react
+```
 
 **Cоздать и активировать виртуальное окружение:**
 
-> python -m venv env
-
-> venv/scripts/activate.ps1
+```
+python -m venv env
+venv/scripts/activate.ps1
+```
 
 **Установить зависимости из файла requirements.txt:**
 
-> cd .\backend\
-
-> python -m pip install --upgrade pip
-
-> pip install -r requirements.txt
+```
+cd .\backend\
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
 **Предварительно установим Docker на ПК:**
 
@@ -45,37 +56,47 @@
 
 **Рассмотрим установку Docker на ОС Linux.**
 
-> sudo apt update && apt upgrade -y
+```
+sudo apt update && apt upgrade -y
+```
 
 **Удаляем старый Docker:**
-
-> sudo apt remove docker
+```
+sudo apt remove docker
+```
 
 **Устанавливаем Docker:**
 
-> sudo apt install docker.io
+```
+sudo apt install docker.io
+```
 
 **Запускаем Docker:**
 
-> sudo systemctl start docker
+```
+sudo systemctl start docker
+```
 
 **Откроем образ hello-world для проверки:**
 
-> docker run hello-world 
+```
+docker run hello-world 
+```
 
 **Создадим в папке infra файл с переменными окружения .env:**
 
-> cd infra
-
-> nano .env
-
->DB_ENGINE=django.db.backends.postgresql 
->DB_NAME=postgres 
->POSTGRES_USER=postgres 
->POSTGRES_PASSWORD=postgres 
->DB_HOST=db 
->DB_PORT=5432
-
+```
+cd infra
+nano .env
+```
+```
+DB_ENGINE=django.db.backends.postgresql 
+DB_NAME=postgres 
+POSTGRES_USER=postgres 
+POSTGRES_PASSWORD=postgres 
+DB_HOST=db 
+DB_PORT=5432
+```
 
 **В settings.py добавляем следующее:**
 
@@ -108,8 +129,11 @@ sudo docker compose exec backend python manage.py collectstatic --no-input
 **Тестовые адреса для проверки:**
 
 >http://localhost/ - главная страница сайта;
+
 >http://localhost/admin/ - админ панель;
+
 >http://localhost/api/ - API проекта
+
 >http://localhost/api/docs/redoc.html - документация к API
 
 ## Автор проекта: [Смаилов Владислав](https://github.com/vladsmailov).
