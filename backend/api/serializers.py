@@ -228,6 +228,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     'Нельзя добавлять один и тот же ингредиент дважды.'
                 )
+            ingredients_list.append(ingredient['id'])
         if data['cooking_time'] <= 0:
             raise ValidationError(
                 'Увы, но мгновенное приготовление блюда невозможно.'
