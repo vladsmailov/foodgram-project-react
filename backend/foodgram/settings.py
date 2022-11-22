@@ -199,8 +199,8 @@ DJOSER = {
         'user': ['rest_framework.permissions.IsAuthenticated'],
     },
 }
-#Для прода
+# Для прода
 CORS_ORIGIN_ALLOW_ALL = False
-#CORS_ORIGIN_ALLOW_ALL для локального теста
+# CORS_ORIGIN_ALLOW_ALL для локального теста
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/v1/.*$'
