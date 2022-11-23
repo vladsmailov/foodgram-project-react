@@ -9,6 +9,7 @@
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
+from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -157,9 +158,11 @@ class ListRecipeSerializer(serializers.ModelSerializer):
     При GET-запросе выводит данные в формате json.
     """
 
-    image = Base64ImageField(required=False, allow_null=True)
+    image = Base64ImageField()
     author = UserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = serializers.SerializerMethodField(
+        read_only=True
+    )
     tags = TagSerializer(many=True)
     is_favorite = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -174,7 +177,8 @@ class ListRecipeSerializer(serializers.ModelSerializer):
             'is_in_shopping_cart',
         )
 
-    def get_ingredients(self, obj):
+    @staticmethod
+    def get_ingredients(obj):
         """Метод получения ингредиента для вывода данных."""
         ingredients = IngredientQuantity.objects.filter(current_recipe=obj)
         return IngredientQuantityShowSerializer(ingredients, many=True).data
@@ -206,10 +210,12 @@ class ListRecipeSerializer(serializers.ModelSerializer):
 class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     """Десериализатор для создания новых рецептов и обновления старых."""
 
-    image = Base64ImageField(required=False, allow_null=True)
+    image = Base64ImageField(use_url=True, max_length=None)
     author = UserSerializer(read_only=True)
     ingredients = IngredientQuantitySerializer(many=True)
-    tags = TagListSerializer(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
 
     class Meta:
         """Мета для десериализатора рецептов."""
@@ -219,13 +225,17 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'image',
             'name', 'text', 'cooking_time',
         )
-
+    
+    @atomic
     def create(self, validated_data):
         """Метод для создания новых записей рецептов в БД."""
+        request = self.context.get('request')
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        image = validated_data.pop('image')
-        recipe = Recipe.objects.create(image=image, **validated_data)
+        recipe = Recipe.objects.create(
+            author=request.user,
+            **validated_data
+        )
         self.create_ingredients(recipe, ingredients)
         recipe.tags.set(tags)
         return recipe
@@ -256,6 +266,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
         return data
 
+    @atomic
     def update(self, instance, validated_data):
         """Метод для обновления уже существующих рецептов в БД."""
         instance.name = validated_data.get('name', instance.name)
@@ -274,7 +285,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """Метод вывода данных созданного объекта."""
-        return ListRecipeSerializer(instance, context=self.context).data
+        return ListRecipeSerializer(
+            instance,
+            context={
+                'request': self.context.get('request'),
+            }
+        ).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
