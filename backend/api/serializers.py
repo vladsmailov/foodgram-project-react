@@ -340,7 +340,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, object):
         """Поле-индикатор наличия подписки на автора."""
-        print('hui1')
         return Subscribe.objects.prefetch_related(
             Prefetch('follower', queryset=Subscribe.objects.filter(
                 following__username=object.username,
@@ -351,7 +350,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, author):
         """Метод получения рецепта."""
-        print('hui2')
         queryset = self.context.get('request')
         recipes_limit = queryset.query_params.get('recipes_limit')
         if not recipes_limit:
@@ -367,7 +365,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, author):
         """Количество рецептов автора."""
-        print('hui3')
         return author.recipes.all().count()
 
 

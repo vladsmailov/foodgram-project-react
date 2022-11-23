@@ -39,7 +39,6 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     def subscribe(self, request, pk):
         """Эндпоинт подписки."""
-        print('hui')
         user = request.user
         author = get_object_or_404(User, id=pk)
         if user == author:
@@ -79,7 +78,6 @@ class UserViewSet(viewsets.GenericViewSet):
         Авторов, на которых существует подписка
         запрашивающего пользователя.
         """
-        print('pizda')
         result = self.paginate_queryset(request.user.follower.all())
         serializer = SubscribeSerializer(
             result, many=True, context={'request': request}
