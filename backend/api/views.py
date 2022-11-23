@@ -194,19 +194,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
         При совпадении ингредиентов в нескольких рецептах
         их количество суммируется.
         """
-        queryset = self.get_queryset()
-        cart_objects = ShoppingCart.objects.filter(user=request.user)
-        recipes = queryset.filter(shoppingcart__in=cart_objects)
-        ingredients = IngredientQuantity.objects.filter(recipes__in=recipes)
-        ingredients_list = Ingredient.objects.filter(
-            quantity__in=ingredients
-        ).annotate(total=Sum('quantity__quantity'))
-
-        fields = [f'{ingredient.name}, {ingredient.total}'
-                  f' {ingredient.measurement_unit}'
-                  for ingredient in ingredients_list]
-        filename = 'shopping-cart.pdf'
-        response_content = '\n'.join(fields)
-        response = HttpResponse(response_content, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
+        shopping_cart = IngredientQuantity.objects.filter(
+            current_recipe__cart_recipe__user=request.user
+        ).values_list(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).order_by(
+            'ingredient__name'
+        ).annotate(
+            ingredient_total=Sum('amount')
+        )
+        text = 'Cписок покупок: \n'
+        for ingredients in shopping_cart:
+            name, measurement_unit, amount = ingredients
+            text += f'{name}: {amount} {measurement_unit}\n'
+        response = HttpResponse(text, content_type='text/plain')
+        filename = 'shop-list.pdf'
+        response['Content-Disposition'] = (
+            f'attachment; filename={filename}'
+        )
         return response
