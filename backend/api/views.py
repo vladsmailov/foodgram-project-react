@@ -11,11 +11,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import IngredientSearchFilter, RecipeFilter
+from .pagination import CustomPagination
 from .permissions import AdminAuthorPermission
 from .serializers import (CreateUpdateRecipeSerializer, FavoriteSerializer,
                           IngredientSerializer, ListRecipeSerializer,
                           ShoppingCartSerializer, SubscribeCreateSerializer,
-                          SubscribeSerializer, TagSerializer, UserSerializer)
+                          SubscribeSerializer, TagSerializer)
 from recipes.models import (Favorite, Ingredient, IngredientQuantity, Recipe,
                             ShoppingCart, Tag, User)
 from users.models import Subscribe
@@ -27,11 +28,50 @@ class UserViewSet(viewsets.GenericViewSet):
     """UserViewSet for API."""
 
     queryset = User.objects.all()
-    pagination_class = PageNumberPagination
-    serializer_class = UserSerializer
+    pagination_class = CustomPagination
+    serializer_class = SubscribeSerializer
     permission_classes = (AllowAny,)
 
-    @action(detail=False, permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=('post',),
+        permission_classes=[IsAuthenticated]
+    )
+    def subscribe(self, request, pk):
+        """Эндпоинт подписки."""
+        print('hui')
+        user = request.user
+        author = get_object_or_404(User, id=pk)
+        if user == author:
+            return Response({
+                'errors': 'Нельзя сотворить здесь!'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if Subscribe.objects.filter(following=user, author=author).exists():
+            return Response({
+                'errors': 'Нельзя подписыаться на одного автора дважды.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        subscribe = Subscribe.objects.create(following=user, author=author)
+        serializer = SubscribeCreateSerializer(
+            subscribe, context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def delete_subscribe(self, request, pk):
+        """Эндпоинт удаления подписки."""
+        user = request.user
+        author = get_object_or_404(User, id=pk)
+        subscribe = get_object_or_404(
+            Subscribe, following=user, author=author
+        )
+        subscribe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=('get',),
+        permission_classes=[IsAuthenticated],
+    )
     def subscriptions(self, request):
         """
         Эндпоинт для выдачи авторов.
@@ -39,46 +79,12 @@ class UserViewSet(viewsets.GenericViewSet):
         Авторов, на которых существует подписка
         запрашивающего пользователя.
         """
-
-        result = self.paginate_queryset(request.user.subscriber.all())
+        print('pizda')
+        result = self.paginate_queryset(request.user.follower.all())
         serializer = SubscribeSerializer(
             result, many=True, context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
-
-    @action(
-        detail=True,
-        methods=('post',),
-        permission_classes=[IsAuthenticated]
-    )
-    def subscribe(self, request, id=None):
-        """Эндпоинт подписки."""
-        user = request.user
-        author = get_object_or_404(User, id=id)
-        if user == author:
-            return Response({
-                'errors': 'Нельзя сотворить здесь!'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        if Subscribe.objects.filter(user=user, author=author).exists():
-            return Response({
-                'errors': 'Нельзя подписыаться на одного автора дважды.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        subscribe = Subscribe.objects.create(user=user, author=author)
-        serializer = SubscribeCreateSerializer(
-            subscribe, context={'request': request}
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @subscribe.mapping.delete
-    def delete_subscribe(self, request, id=None):
-        """Эндпоинт удаления подписки."""
-        user = request.user
-        author = get_object_or_404(User, id=id)
-        subscribe = get_object_or_404(
-            Subscribe, user=user, author=author
-        )
-        subscribe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class IngredientViewSet(viewsets.ModelViewSet):

@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
         if not request or request.user.is_anonymous:
             return False
         return Subscribe.objects.filter(
-            user=request.user, author=obj).exists()
+            following=request.user, author=obj).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -164,7 +164,7 @@ class ListRecipeSerializer(serializers.ModelSerializer):
         read_only=True
     )
     tags = TagSerializer(many=True)
-    is_favorite = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
@@ -173,7 +173,7 @@ class ListRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients', 'image',
-            'name', 'text', 'cooking_time', 'is_favorite',
+            'name', 'text', 'cooking_time', 'is_favorited',
             'is_in_shopping_cart',
         )
 
@@ -183,7 +183,7 @@ class ListRecipeSerializer(serializers.ModelSerializer):
         ingredients = IngredientQuantity.objects.filter(current_recipe=obj)
         return IngredientQuantityShowSerializer(ingredients, many=True).data
 
-    def get_is_favorite(self, obj):
+    def get_is_favorited(self, obj):
         """Метод для отображения наличия рецепта в "избранном"."""
         request = self.context.get('request')
         if request.user.is_authenticated:
@@ -325,44 +325,50 @@ class RecipeShortShowSerializer(serializers.ModelSerializer):
 
 class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения авторов НА которых существует подписка."""
-    email = serializers.ReadOnlyField(source='author.email')
-    id = serializers.ReadOnlyField(source='author.id')
-    username = serializers.ReadOnlyField(source='author.username')
-    first_name = serializers.ReadOnlyField(source='author.first_name')
-    last_name = serializers.ReadOnlyField(source='author.last_name')
-    is_subscribed = serializers.SerializerMethodField()
+
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField()
-    recipe_count = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         """Мета для сериализатора подписки."""
 
         model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipe_count')
+        fields = UserSerializer.Meta.fields + (
+            'recipes', 'recipes_count', 'is_subscribed'
+        )
 
     def get_is_subscribed(self, object):
         """Поле-индикатор наличия подписки на автора."""
+        print('hui1')
         return Subscribe.objects.prefetch_related(
-            Prefetch('subscribers', queryset=Subscribe.objects.filter(
-                user=object.user,
+            Prefetch('follower', queryset=Subscribe.objects.filter(
+                following__username=object.username,
                 author=object.id
             )
             )
         ).exists()
 
-    def get_recipes(self, object):
-        """Метод для выдачи рецептов определенного автора."""
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        queryset = Recipe.objects.filter(author=object.author)
-        if limit:
-            queryset = queryset[:limit]
-        return RecipeShortShowSerializer(queryset, many=True).data
+    def get_recipes(self, author):
+        """Метод получения рецепта."""
+        print('hui2')
+        queryset = self.context.get('request')
+        recipes_limit = queryset.query_params.get('recipes_limit')
+        if not recipes_limit:
+            return RecipeShortShowSerializer(
+                Recipe.objects.filter(author=author),
+                many=True, context={'request': queryset}
+            ).data
+        return RecipeShortShowSerializer(
+            Recipe.objects.filter(author=author)[recipes_limit],
+            many=True,
+            context={'request': queryset}
+        ).data
 
-    def get_recipe_count(self, object):
+    def get_recipes_count(self, author):
         """Количество рецептов автора."""
-        return object.author.recipes.all().count()
+        print('hui3')
+        return author.recipes.all().count()
 
 
 class SubscribeCreateSerializer(serializers.ModelSerializer):
@@ -371,17 +377,17 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         """Мета для сериализатора создания подписки."""
         model = Subscribe
-        fields = ('user', 'author')
+        fields = ('following', 'author')
 
     def validate(self, data):
         """Метод валидации данных."""
         get_object_or_404(User, username=data['author'])
-        if self.context['request'].user == data['author']:
+        if self.context['request'].following == data['author']:
             raise ValidationError({
                 'errors': 'Нельзя подписаться на самого себя.'
             })
         if Subscribe.objects.filter(
-                user=self.context['request'].user,
+                following=self.context['request'].following,
                 author=data['author']
         ):
             raise ValidationError({

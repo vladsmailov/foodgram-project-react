@@ -10,8 +10,14 @@ from .models import (Favorite, Ingredient, IngredientQuantity, Recipe,
 class BaseAdminSettings(admin.ModelAdmin):
     """Настройки панели администартора."""
 
+    list_display = (
+        'email',
+        'password',
+        'firs_name',
+        'last_name',
+        'username',
+    )
     empty_value_display = '-пусто-'
-    list_filter = ('author', 'name', 'tags')
 
 
 class IngredientAdmin(BaseAdminSettings):

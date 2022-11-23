@@ -58,18 +58,29 @@ class User(AbstractUser):
 class Subscribe(models.Model):
     """Модель подписки на автора рецептов."""
 
-    user = models.ForeignKey(
+    following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscriber',
+        related_name='follower',
     )
 
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscribed_to',
+        related_name='following',
     )
+
+    class Meta:
+        """Мета модели подписки."""
+        constraints = [
+            models.UniqueConstraint(fields=["author", "following"],
+                                    name="user_following"),
+            models.CheckConstraint(
+                check=~models.Q(author=models.F('following')),
+                name='not_self_following_author'
+            )
+        ]
 
     def __str__(self):
         """Метод вывода в строковый формат объектов подписки."""
-        return f'{self.user} подписан на {self.author}'
+        return f'{self.following} подписан на {self.author}'
