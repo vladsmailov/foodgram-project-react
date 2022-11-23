@@ -24,6 +24,7 @@ class IngredientAdmin(BaseAdminSettings):
     list_display_links = ('name',)
     search_fields = ('name',)
     list_filter = ('name',)
+    empty_value_display = '-пусто-'
 
 
 class IngredientQuantityInLine(admin.TabularInline):
@@ -34,6 +35,7 @@ class IngredientQuantityInLine(admin.TabularInline):
 
     model = IngredientQuantity
     extra = 0
+    min_num = 1
 
 
 class TagAdmin(BaseAdminSettings):
@@ -47,6 +49,7 @@ class TagAdmin(BaseAdminSettings):
     list_display_links = ('name', 'colored', 'slug',)
     search_fields = ('name', 'slug')
     list_filter = ('name',)
+    empty_value_display = '-пусто-'
 
     @admin.display
     def colored(self, obj):
@@ -70,6 +73,7 @@ class RecipeAdmin(BaseAdminSettings):
     filter_horizontal = ('tags',)
     inlines = (IngredientQuantityInLine,)
     exclude = ('ingredients', )
+    empty_value_display = '-пусто-'
 
 
 class FavoriteAdmin(admin.ModelAdmin):

@@ -301,17 +301,15 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ('name', 'id', 'user', 'recipe',)
 
-    def validate(self, data):
-        """Метод для валидации данных сериализатора "избранное"."""
-        if Favorite.objects.filter(user=data['user'],
-                                   recipe=data['recipe']).exists():
-            raise serializers.ValidationError(
-                'Рецепт уже в списке избранных.'
-            )
-        return data
+    def to_representation(self, instance):
+        """Метод отображения данных."""
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeShortShowSerializer(
+            instance.recipe, context=context).data
 
 
-class RecipeSubscribedToSerializer(serializers.ModelSerializer):
+class RecipeShortShowSerializer(serializers.ModelSerializer):
     """
     Сериализатор для отображения нужных полей объекта рецепты.
 
@@ -360,7 +358,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=object.author)
         if limit:
             queryset = queryset[:limit]
-        return RecipeSubscribedToSerializer(queryset, many=True).data
+        return RecipeShortShowSerializer(queryset, many=True).data
 
     def get_recipe_count(self, object):
         """Количество рецептов автора."""
@@ -432,6 +430,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         """Метод для вывода данных при GET-запросе."""
         request = self.context.get('request')
         context = {'request': request}
-        return RecipeSubscribedToSerializer(
+        return RecipeShortShowSerializer(
             instance.recipe,
             context=context).data
