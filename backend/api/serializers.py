@@ -225,7 +225,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'image',
             'name', 'text', 'cooking_time',
         )
-    
+
     @atomic
     def create(self, validated_data):
         """Метод для создания новых записей рецептов в БД."""
