@@ -229,13 +229,9 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
     @atomic
     def create(self, validated_data):
         """Метод для создания новых записей рецептов в БД."""
-        request = self.context.get('request')
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(
-            author=request.user,
-            **validated_data
-        )
+        recipe = Recipe.objects.create(**validated_data)
         self.create_ingredients(recipe, ingredients)
         recipe.tags.set(tags)
         return recipe
