@@ -47,7 +47,7 @@ class IngredientQuantity(models.Model):
         on_delete=models.CASCADE,
         related_name='+'
     )
-    quantity = models.PositiveSmallIntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента',
         default=0
     )
@@ -60,8 +60,8 @@ class IngredientQuantity(models.Model):
                 fields=('current_recipe', 'ingredient',),
                 name='recipe_ingredient_exists'),
             models.CheckConstraint(
-                check=models.Q(quantity__gte=1),
-                name='quantity_gte_1'),
+                check=models.Q(amount__gte=1),
+                name='amount_gte_1'),
         )
 
     def __str__(self):
@@ -70,7 +70,7 @@ class IngredientQuantity(models.Model):
 
         Ингредиента и его количества.
         """
-        return f'{self.quantity} {self.ingredient}'
+        return f'{self.amount} {self.ingredient}'
 
 
 class Tag(models.Model):

@@ -101,7 +101,7 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
         model = IngredientQuantity
         fields = (
             'id',
-            'quantity',
+            'amount',
         )
 
     def validate_quantity(self, data):
@@ -118,7 +118,7 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return IngredientQuantity.objects.create(
             ingredient=validated_data.get('id'),
-            quantity=validated_data.get('quantity')
+            amount=validated_data.get('amount')
         )
 
 
@@ -147,7 +147,7 @@ class IngredientQuantityShowSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'measurement_unit',
-            'quantity',
+            'amount',
         )
 
 
@@ -241,7 +241,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         IngredientQuantity.objects.bulk_create([
             IngredientQuantity(
                 current_recipe=recipe,
-                quantity=ingredient['quantity'],
+                amount=ingredient['amount'],
                 ingredient=ingredient['ingredient'],
             ) for ingredient in ingredients
         ])
