@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import (Favorite, Ingredient, IngredientQuantity, Recipe,
-                     ShoppingCart, Tag)
+                     ShoppingCart, Tag, User)
 
 
 class BaseAdminSettings(admin.ModelAdmin):
@@ -92,6 +92,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     search_fields = ('user',)
 
 
+admin.site.register(User, BaseAdminSettings)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
