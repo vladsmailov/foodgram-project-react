@@ -8,7 +8,6 @@
 """
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Prefetch
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
@@ -337,16 +336,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
         fields = UserSerializer.Meta.fields + (
             'recipes', 'recipes_count', 'is_subscribed'
         )
-
-    def get_is_subscribed(self, object):
-        """Поле-индикатор наличия подписки на автора."""
-        return Subscribe.objects.prefetch_related(
-            Prefetch('follower', queryset=Subscribe.objects.filter(
-                following__username=object.username,
-                author=object.id
-            )
-            )
-        ).exists()
 
     def get_recipes(self, author):
         """Метод получения рецепта."""

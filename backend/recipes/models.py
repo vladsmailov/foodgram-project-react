@@ -1,6 +1,7 @@
 """Модели для приложения recipes."""
 from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -125,18 +126,23 @@ class Recipe(models.Model):
         )
     )
     image = models.ImageField(
-        "Картинка",
-        upload_to="recipes/",
-        blank=True,
-        null=True
+        'Картинка',
+        upload_to='recipes/media/',
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         help_text=(
             f'{"Укажите примерное время,"}'
             f'{"необходимое для приготовления Вашего блюда."}',
-        )
+        ),
+        validators=[
+            MinValueValidator(
+                1,
+                message='Время приготовления не может быть меньше 1 мин.'
+            )
+        ]
     )
+
     text = models.TextField(
         'Описание рецепта',
         help_text=(
