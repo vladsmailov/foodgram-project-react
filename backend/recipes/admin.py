@@ -23,7 +23,7 @@ class IngredientAdmin(BaseAdminSettings):
     list_display_links = ('name',)
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'
+    empty_value_display = '-0-'
 
 
 class IngredientQuantityInLine(admin.TabularInline):
@@ -72,7 +72,7 @@ class RecipeAdmin(BaseAdminSettings):
     filter_horizontal = ('tags',)
     inlines = (IngredientQuantityInLine,)
     exclude = ('ingredients', )
-    empty_value_display = '-пусто-'
+    empty_value_display = '-0-'
 
 
 class FavoriteAdmin(admin.ModelAdmin):
