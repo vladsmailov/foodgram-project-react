@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
 from .filters import IngredientSearchFilter, RecipeFilter
@@ -112,7 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
-    permission_classes = (AdminAuthorPermission, )
+    permission_classes = (IsAuthenticatedOrReadOnly, AdminAuthorPermission, )
     filterset_class = RecipeFilter
     search_fields = ('=name',)
 
