@@ -355,7 +355,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
                 many=True, context={'request': queryset}
             ).data
         return RecipeShortShowSerializer(
-            Recipe.objects.filter(author=author)[recipes_limit],
+            Recipe.objects.filter(author=author)[:int(recipes_limit)],
             many=True,
             context={'request': queryset}
         ).data
