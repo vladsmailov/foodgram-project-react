@@ -337,6 +337,14 @@ class SubscribeSerializer(serializers.ModelSerializer):
             'recipes', 'recipes_count', 'is_subscribed'
         )
 
+    def get_is_subscribed(self, obj: User):
+        """Метод вывода данных о подписке."""
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return Subscribe.objects.filter(
+            following=request.user, author=obj).exists()
+
     def get_recipes(self, author):
         """Метод получения рецепта."""
         queryset = self.context.get('request')
