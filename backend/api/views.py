@@ -13,7 +13,6 @@ from rest_framework.response import Response
 
 from .filters import IngredientSearchFilter, RecipeFilter
 from .pagination import CustomPagination
-from .permissions import AdminAuthorPermission
 from .serializers import (CreateUpdateRecipeSerializer, FavoriteSerializer,
                           IngredientSerializer, ListRecipeSerializer,
                           ShoppingCartSerializer, SubscribeCreateSerializer,
