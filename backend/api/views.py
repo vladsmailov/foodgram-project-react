@@ -113,7 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
-    permission_classes = (IsAuthenticatedOrReadOnly, AdminAuthorPermission, )
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     filterset_class = RecipeFilter
     search_fields = ('=name',)
 
