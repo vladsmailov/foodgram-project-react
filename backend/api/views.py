@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import IngredientSearchFilter, RecipeFilter
@@ -30,7 +30,6 @@ class UserViewSet(viewsets.GenericViewSet):
     queryset = User.objects.all()
     pagination_class = CustomPagination
     serializer_class = SubscribeSerializer
-    permission_classes = (AllowAny,)
 
     @action(
         detail=True,
