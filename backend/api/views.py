@@ -78,7 +78,10 @@ class UserViewSet(viewsets.GenericViewSet):
         Авторов, на которых существует подписка
         запрашивающего пользователя.
         """
-        result = self.paginate_queryset(request.user.follower.all())
+        result = self.paginate_queryset(User.objects.filter(
+            following__following=request.user
+            )
+        )
         serializer = SubscribeSerializer(
             result, many=True, context={'request': request}
         )
